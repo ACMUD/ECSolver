@@ -1,95 +1,79 @@
 import re
-#El interprete de las expresiones brindadas 
-class logic:
 
-    def _init_(self,texto):
-        self.texto=texto
-        self.division=""
-        self.constantes=[]
-        self.funciones=[]
-        self.referencias=[]
-        self.value= False;
-    
+# El interprete de las expresiones brindadas 
+class Logic:
+    def __init__(self, texto):
+        self.texto = texto.strip()
+        self.division = ""
+        self.constantes = []
+        self.funciones = []
+        self.referencias = []
+        self.rangos = []
+        self.value = False
+
     def funcionesFun(self):
-        #Clasificacion de las funciones presentes, solo despues del igual
         try:
-            #parte de interes, despues de = 
-            formula=self.division[1]
-            
-            #buscar las funciones con re 
-            #pattern de las funciones es con mayuscula
+            formula = self.division[1].upper()  # Normalizar a mayúsculas
             pattern = r"\b([A-Z]+)\s*\("
-            #busca todas las funciones por el pattern que contiene 
-
-            self.funciones= re.findall(pattern,formula)
+            self.funciones = re.findall(pattern, formula)
         except IndexError:
-            print("no se ecnontro ninguna funcion asignada")
-          
+            print("No se encontró ninguna función")
         except Exception as e:
-            print(f"Ocurrio un error en el proceso de clasificacion {e}")
-    
+            print(f"Error en funciones: {e}")
+
     def constantesFun(self):
-        #clasificacion de constantes
-        try: 
-            #las cosntantes solo se encuentran despues del igual 
-            formula= self.division[1]
-            #patern de las constantes
+        try:
+            formula = self.division[1]
             pattern = r'[-+]?\b\d+(?:\.\d+)?\b'
             self.constantes = re.findall(pattern, formula)
         except IndexError:
-            print("No se encontro ninguna constante")
-        except Exception as e: 
-            print(f"Ocurrio un error de ejecucion {e}")
+            print("No se encontró ninguna constante")
+        except Exception as e:
+            print(f"Error en constantes: {e}")
 
     def referenciasFun(self):
-        #Clasificacion de referencias
         try:
-            #Clasificacion mediante el pattern
-            formula= self.division[1]
-            pattern = r'\b[A-Z]{1,3}[1-9][0-9]{0,4}\b'
-            self.referencias = re.findall(pattern, formula)
-        except IndexError:
-            print("No se encontro ninguna constante")
-        except Exception as e: 
-            print(f"Ocurrio un error de ejecucion {e}")
+            formula = self.division[1].upper()
+            # Detectar rangos como A1:B34
+            self.rangos = re.findall(r'\b[A-Z]{1,3}[1-9][0-9]{0,4}:[A-Z]{1,3}[1-9][0-9]{0,4}\b', formula)
+            # Detectar referencias simples (excluyendo las que ya están en rangos)
+            todas = re.findall(r'\b[A-Z]{1,3}[1-9][0-9]{0,4}\b', formula)
+            partes_de_rangos = [celda for r in self.rangos for celda in r.split(":")]
+            self.referencias = [ref for ref in todas if ref not in partes_de_rangos]
+        except Exception as e:
+            print(f"Error en referencias: {e}")
 
-
-        
     def imprimirCadenaFun(self):
-        if self.value==True:
-            #Mostrar las dos partes del igual al usuario
-            print(f"la cadena esta dividiad en {self.division}, funciones {self.funciones}, constantes {self.constantes},referencias{self.referencias}")
+        if self.value:
+            print("\n--- Resultado ---")
+            print(f"Funciones encontradas: {self.funciones}")
+            print(f"Constantes encontradas: {self.constantes}")
+            print(f"Referencias individuales: {self.referencias}")
+            print(f"Rangos detectados: {self.rangos}")
+            print("------------------\n")
         else:
-            #cuando no se cumpe la expresion repetir el proceso
-            print("No pudes imprimr nada el valor ingreado no corresponde a una exprecion logica ")
-
+            print("No puedes imprimir nada. La fórmula no empieza con '='.")
 
     def clasificacionFun(self):
-        #Verifcar si hay una expresion de igualdad
-        for i in self.texto:
-            if i=="=":
-                self.value=True
-        #recorrre la cadena en busca de una expresion valida 
-        #clasificacion de la primera igualdad
-        try:
-            if self.value==True:
-                self.division=self.texto.split(sep="=",maxsplit=2)
-        except:
-            print("No se encuentra ninguna expresion de igualdad, intentelo de nuevo")
+        if "=" in self.texto:
+            self.value = True
+        else:
+            print("❌ La fórmula no contiene '='.")
             return
-        self.funcionesFun()
-        self.constantesFun()
-        self.referenciasFun()
-        self.imprimirCadenaFun()
 
-        
-        
-        
+        try:
+            self.division = self.texto.split("=", maxsplit=1)
+            self.funcionesFun()
+            self.constantesFun()
+            self.referenciasFun()
+            self.imprimirCadenaFun()
+        except Exception as e:
+            print(f"Ocurrió un error general: {e}")
 
-#parte para hacer el test de la prueba logica
+# Parte para hacer el test
 while True:
-    test = input("Ingrea tu expresion a valorar: ")
-    prueba = logic(test)
+    test = input("Ingrese su expresión a valorar (ej: =SUMA(1,A1,B2:B5)): ")
+    prueba = Logic(test)
     prueba.clasificacionFun()
-    if(prueba.value==True):
+    if prueba.value:
         break
