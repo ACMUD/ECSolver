@@ -10,24 +10,25 @@ Este módulo permite **registrar, evaluar, guardar y cargar** de forma segura fu
 
 ## Estructura
 - `FunctionRegistry`: Clase principal para registrar y evaluar funciones.
+- `FunctionSave`: Clase auxiliar para guardar y cargar funciones desde archivos JSON.
 
-## Uso 
+# Uso 
 
-# Crear Registro
+## Crear Registro
 registry = FunctionRegistry()
 
-# Registrar una función
+## Registrar una función
 def suma(a, b):
     return a + b
 
 registry.register("suma", suma)
 
-# Evaluar la función
+## Evaluar la función
 resultado = registry.evaluate("suma", 2, 3)
 print(resultado)  # 5
 
-# Guardar en JSON
-**No implementado**
+## Guardar en JSON
+FunctionSave.save_functions(registry, "mis_funciones.json")
 
-# Cargar del JSON
+## Cargar del JSON
 **No implementado**
