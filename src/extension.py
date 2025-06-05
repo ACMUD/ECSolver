@@ -40,6 +40,26 @@ class FunctionRegistry:
         self._functions[name] = {"func": func, "source": source}
         print(f"Función '{name}' registrada con éxito.")
 
+    def evaluate(self, name, *args):
+        """
+        Evalúa una función registrada con los argumentos dados.
+
+        Parámetros:
+            name (str): Nombre de la función.
+            *args: Argumentos para la función.
+
+        Retorna:
+            Resultado de la función, o None si hay error o no está registrada.
+        """
+        if name not in self._functions:
+            print(f"Error: La función '{name}' no ha sido registrada.")
+            return
+        try:
+            result = self._functions[name]["func"](*args)
+            return result
+        except Exception as e:
+            print(f"Error: fallo al ejecutar la función '{name}':", e)
+            return
 
     def get_registered_functions(self):
         """
