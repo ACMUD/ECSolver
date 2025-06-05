@@ -4,7 +4,7 @@ import unittest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
-from extension import FunctionRegistry
+from extension import FunctionRegistry, FunctionSave
 
 
 # --- Funciones de prueba ---
@@ -56,6 +56,18 @@ class TestFunctionRegistry(unittest.TestCase):
         self.registry.register("error_func", error_func)
         resultado = self.registry.evaluate("error_func", 1, 2)
         self.assertIsNone(resultado)
+
+    def test_save_and_load_functions(self):
+        self.registry.register("mi_suma", suma)
+        FunctionSave.save_functions(self.registry, path="test_functions.json")
+        loaded = FunctionSave.load_functions(path="test_functions.json")
+        self.assertIn("mi_suma", [f["name"] for f in loaded])
+
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.exists("test_functions.json"):
+            os.remove("test_functions.json")
+
 
 if __name__ == "__main__":
     unittest.main()
