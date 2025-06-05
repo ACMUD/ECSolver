@@ -3,6 +3,7 @@
 # Este módulo permite al usuario registrar funciones personalizadas
 # y luego usarlas desde otras partes del programa.
 import types
+import json
 import inspect
 
 class FunctionRegistry:
@@ -100,3 +101,34 @@ class FunctionRegistry:
             for name, data in self._functions.items()
         ]
     
+class FunctionSave:
+    """
+    Clase auxiliar para guardar y cargar funciones registradas desde archivos JSON.
+    """
+    def save_functions(self, path="functions.json"):
+        """
+        Guarda las funciones registradas en un archivo JSON.
+
+        Parámetros:
+            registry (FunctionRegistry): Registro de funciones.
+            path (str): Ruta del archivo JSON.
+        """
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.get_registered_functions(), f, indent=4, ensure_ascii=False)
+
+    def load_functions(path="functions.json"):
+        """
+        Carga funciones desde un archivo JSON.
+
+        Parámetros:
+            path (str): Ruta del archivo JSON.
+
+        Retorna:
+            list[dict]: Lista de funciones con claves 'name' y 'source'.
+        """
+        try:
+            with open(path, "r") as f:
+                data = json.load(f)
+            return data  
+        except FileNotFoundError:
+            return []
