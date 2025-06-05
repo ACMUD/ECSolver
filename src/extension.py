@@ -1,0 +1,134 @@
+# extension.py
+
+# Este módulo permite al usuario registrar funciones personalizadas
+# y luego usarlas desde otras partes del programa.
+import types
+import json
+import inspect
+
+class FunctionRegistry:
+    """
+    Clase para registrar y evaluar funciones personalizadas de forma segura.
+
+    Asegura que las funciones registradas:
+    - No utilicen palabras clave peligrosas (como 'os', 'eval', etc.).
+    - No usen nombres reservados como 'SUM', 'IF', etc.
+    """
+    def __init__(self):
+        """Inicializa el registro con funciones permitidas y palabras clave peligrosas."""
+        self._functions = {}
+        self._reserved = {"SUM", "AVG", "IF", "MAX", "MIN"} 
+        self._dangerous_keywords = [
+            "os", "open", "eval", "exec", "__import__"
+        ]
+        
+    def register(self, name: str, func):
+        """
+        Registra una función en el sistema si es segura, no usa el nombre de una función reservada y es válida.
+
+        Parámetros:
+            name (str): Nombre de la función.
+            func (function): Objeto de función a registrar.
+
+        Retorna:
+            None
+        """
+        if name.upper() in self._reserved:
+            print(f"Error: El nombre '{name}' está reservado y no se puede usar.")
+            return
+        if not isinstance(func, types.FunctionType):
+            print(f"Error: lo que intentas registrar no es una función.")
+            return
+        
+        if not self.isSafe(func):
+            print(f"Error: lo que intentas registrar no esta permitido.")
+            return
+
+        print(f"Registrando función {name}")
+        source = inspect.getsource(func)
+        self._functions[name] = {"func": func, "source": source}
+        print(f"Función '{name}' registrada con éxito.")
+
+    def isSafe(self,func):
+        """
+        Verifica si el código fuente de una función contiene palabras clave peligrosas.
+
+        Parámetros:
+            func (function): Función a inspeccionar.
+
+        Retorna:
+            bool: True si es segura, False si contiene código peligroso.
+        """
+        try:
+            source = inspect.getsource(func)
+            for word in self._dangerous_keywords:
+                if word in source:
+                    return False  
+            return True  
+        except Exception:
+            return False
+        
+    def evaluate(self, name, *args):
+        """
+        Evalúa una función registrada con los argumentos dados.
+
+        Parámetros:
+            name (str): Nombre de la función.
+            *args: Argumentos para la función.
+
+        Retorna:
+            Resultado de la función, o None si hay error o no está registrada.
+        """
+        if name not in self._functions:
+            print(f"Error: La función '{name}' no ha sido registrada.")
+            return
+        try:
+            result = self._functions[name]["func"](*args)
+            return result
+        except Exception as e:
+            print(f"Error: fallo al ejecutar la función '{name}':", e)
+            return
+
+    def get_registered_functions(self):
+        """
+        Retorna una lista de funciones registradas, incluyendo nombre y código fuente.
+
+        Retorna:
+            list[dict]: Lista de funciones con claves 'name' y 'source'.
+        """
+        return [
+            {"name": name, "source": data["source"]}
+            for name, data in self._functions.items()
+        ]
+    
+class FunctionSave:
+    """
+    Clase auxiliar para guardar y cargar funciones registradas desde archivos JSON.
+    """
+    def save_functions(self, path="functions.json"):
+        """
+        Guarda las funciones registradas en un archivo JSON.
+
+        Parámetros:
+            registry (FunctionRegistry): Registro de funciones.
+            path (str): Ruta del archivo JSON.
+        """
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.get_registered_functions(), f, indent=4, ensure_ascii=False)
+
+    def load_functions(path="functions.json"):
+        """
+        Carga funciones desde un archivo JSON.
+
+        Parámetros:
+            path (str): Ruta del archivo JSON.
+
+        Retorna:
+            list[dict]: Lista de funciones con claves 'name' y 'source'.
+        """
+        try:
+            with open(path, "r") as f:
+                data = json.load(f)
+            return data  
+        except FileNotFoundError:
+            return []
