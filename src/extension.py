@@ -10,16 +10,20 @@ class FunctionRegistry:
     Clase para registrar y evaluar funciones personalizadas de forma segura.
 
     Asegura que las funciones registradas:
+    - No utilicen palabras clave peligrosas (como 'os', 'eval', etc.).
     - No usen nombres reservados como 'SUM', 'IF', etc.
     """
     def __init__(self):
-        """Inicializa el registro con funciones permitidas"""
+        """Inicializa el registro con funciones permitidas y palabras clave peligrosas."""
         self._functions = {}
         self._reserved = {"SUM", "AVG", "IF", "MAX", "MIN"} 
+        self._dangerous_keywords = [
+            "os", "open", "eval", "exec", "__import__"
+        ]
         
     def register(self, name: str, func):
         """
-        Registra una función en el sistema si es segura, no usa el nombre de una función reservada.
+        Registra una función en el sistema si es segura, no usa el nombre de una función reservada y es válida.
 
         Parámetros:
             name (str): Nombre de la función.
@@ -34,12 +38,35 @@ class FunctionRegistry:
         if not isinstance(func, types.FunctionType):
             print(f"Error: lo que intentas registrar no es una función.")
             return
+        
+        if not self.isSafe(func):
+            print(f"Error: lo que intentas registrar no esta permitido.")
+            return
 
         print(f"Registrando función {name}")
         source = inspect.getsource(func)
         self._functions[name] = {"func": func, "source": source}
         print(f"Función '{name}' registrada con éxito.")
 
+    def isSafe(self,func):
+        """
+        Verifica si el código fuente de una función contiene palabras clave peligrosas.
+
+        Parámetros:
+            func (function): Función a inspeccionar.
+
+        Retorna:
+            bool: True si es segura, False si contiene código peligroso.
+        """
+        try:
+            source = inspect.getsource(func)
+            for word in self._dangerous_keywords:
+                if word in source:
+                    return False  
+            return True  
+        except Exception:
+            return False
+        
     def evaluate(self, name, *args):
         """
         Evalúa una función registrada con los argumentos dados.
