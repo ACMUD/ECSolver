@@ -11,6 +11,10 @@ from extension import FunctionRegistry
 def suma(a, b):
     return a + b
 
+def error_func(a, b):
+    return a / 0  # Genera error al evaluar
+
+
 class TestFunctionRegistry(unittest.TestCase):
 
     def setUp(self):
@@ -26,6 +30,24 @@ class TestFunctionRegistry(unittest.TestCase):
     def test_register_reserved_name(self):
         self.registry.register("SUM", suma)
         self.assertNotIn("SUM", self.registered_names())
+
+    def test_register_non_function(self):
+        self.registry.register("no_funcion", 123)
+        self.assertNotIn("no_funcion", self.registered_names())
+
+    def test_evaluate_success(self):
+        self.registry.register("mi_suma", suma)
+        resultado = self.registry.evaluate("mi_suma", 3, 4)
+        self.assertEqual(resultado, 7)
+
+    def test_evaluate_unregistered_function(self):
+        resultado = self.registry.evaluate("desconocida", 1, 2)
+        self.assertIsNone(resultado)
+
+    def test_evaluate_function_with_error(self):
+        self.registry.register("error_func", error_func)
+        resultado = self.registry.evaluate("error_func", 1, 2)
+        self.assertIsNone(resultado)
 
 if __name__ == "__main__":
     unittest.main()
