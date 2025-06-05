@@ -23,7 +23,8 @@ def suma(a, b):
 registry.register("suma", suma)
 
 # Evaluar la función
-**No implementado**
+resultado = registry.evaluate("suma", 2, 3)
+print(resultado)  # 5
 
 # Guardar en JSON
 **No implementado**
