@@ -11,6 +11,10 @@ from extension import FunctionRegistry
 def suma(a, b):
     return a + b
 
+def peligrosa():
+    import os
+    return os.system("ls")
+
 def error_func(a, b):
     return a / 0  # Genera error al evaluar
 
@@ -30,6 +34,10 @@ class TestFunctionRegistry(unittest.TestCase):
     def test_register_reserved_name(self):
         self.registry.register("SUM", suma)
         self.assertNotIn("SUM", self.registered_names())
+
+    def test_register_dangerous_function(self):
+        self.registry.register("insegura", peligrosa)
+        self.assertNotIn("insegura", self.registered_names())
 
     def test_register_non_function(self):
         self.registry.register("no_funcion", 123)
