@@ -54,6 +54,31 @@ class Logic:
         else:
             print("No puedes imprimir nada. La fórmula no empieza con '='.")
 
+    def direccionamientoFun(self):
+        funciones_basicas = {"SUMA", "MAX", "MIN", "PROMEDIO"}
+        funciones_ext = {"SI", "CONTAR.SI", "CONCATENAR"}
+
+        print("\n--- Clasificación y Direccionamiento ---")
+        for constante in self.constantes:
+            print(f"🔹 Constante '{constante}' → Evaluación directa")
+
+        for referencia in self.referencias:
+            print(f"🔹 Referencia '{referencia}' → Resolución de referencia")
+
+        for rango in self.rangos:
+            print(f"🔹 Rango '{rango}' → Resolución de referencia (rango)")
+
+        for funcion in self.funciones:
+            if funcion in funciones_basicas:
+                print(f"🔹 Función básica '{funcion}' → Evaluación funcional")
+            elif funcion in funciones_ext:
+                print(f"🔹 Función extendida '{funcion}' → Evaluación funcional")
+            else:
+                print(f"❌ Función '{funcion}' no reconocida → Error: función desconocida")
+
+        print("-----------------------------------------\n")
+    
+
     def clasificacionFun(self):
         if "=" in self.texto:
             self.value = True
@@ -67,10 +92,15 @@ class Logic:
             self.constantesFun()
             self.referenciasFun()
             self.imprimirCadenaFun()
+            self.direccionamientoFun()
         except Exception as e:
             print(f"Ocurrió un error general: {e}")
 
-# Parte para hacer el test
+
+        
+
+        
+#parte para hacer el test de la prueba logica
 while True:
     test = input("Ingrese su expresión a valorar (ej: =SUMA(1,A1,B2:B5)): ")
     prueba = Logic(test)
