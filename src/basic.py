@@ -1,7 +1,7 @@
 from datetime import datetime
 
 class ExcelCalculadora:
-    
+
     # Validación de que todos los argumentos sean números (int o float)
     def __validar_numeros(self, *args):
         if not args:
